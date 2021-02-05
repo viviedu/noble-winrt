@@ -18,6 +18,8 @@ function fromWindowsUuid(uuid) {
     return uuid.replace(/\{|\}/g, '');
 }
 
+const adTypeServiceData16BitUUID = 0x16;
+
 class WinrtBindings extends events.EventEmitter {
     init() {
         this._deviceMap = {};
@@ -152,7 +154,7 @@ class WinrtBindings extends events.EventEmitter {
                     txPowerLevel: 0,
                     manufacturerData: null,
                     serviceUuids: message.serviceUuids.map(fromWindowsUuid),
-                    serviceData: [],
+                    serviceData: this._retrieveServiceData(message.adStructures),
                 };
                 this.emit(
                     'discover',
@@ -190,6 +192,17 @@ class WinrtBindings extends events.EventEmitter {
         }
     }
 
+    // This will only retrive service data with 16 bit UUIDs. If you need
+    // anything else, parse the relevant adStructures
+    _retrieveServiceData(adStructures) {
+        return adStructures
+            .filter((adStructure) => adStructure.type === adTypeServiceData16BitUUID)
+            .map((adStructure) => ({
+                "uuid": this._toHex(adStructure.data[1]) + this._toHex(adStructure.data[0]),
+                "data": Buffer.from(adStructure.data.slice(2))
+            }));
+    }
+
     _sendMessage(message) {
         debug('out:', message);
         const dataBuf = Buffer.from(JSON.stringify(message), 'utf-8');
@@ -205,6 +218,11 @@ class WinrtBindings extends events.EventEmitter {
             this._requests[requestId] = { resolve, reject };
             this._sendMessage(Object.assign({}, message, { _id: requestId }));
         });
+    }
+
+    // converts a number in range 0-255 to a two byte hex code like "C4"
+    _toHex(number) {
+        return number.toString(16).padStart(2, '0').toUpperCase();
     }
 }
 
