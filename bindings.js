@@ -192,14 +192,14 @@ class WinrtBindings extends events.EventEmitter {
         }
     }
 
-    // This will only retrive service data with 16 bit UUIDs. If you need
+    // This will only retrieve service data with 16 bit UUIDs. If you need
     // anything else, parse the relevant adStructures
     _retrieveServiceData(adStructures) {
         return adStructures
             .filter((adStructure) => adStructure.type === adTypeServiceData16BitUUID)
             .map((adStructure) => ({
-                "uuid": this._toHex(adStructure.data[1]) + this._toHex(adStructure.data[0]),
-                "data": Buffer.from(adStructure.data.slice(2))
+                uuid: this._toHex(adStructure.data[1]) + this._toHex(adStructure.data[0]),
+                data: Buffer.from(adStructure.data.slice(2))
             }));
     }
 
