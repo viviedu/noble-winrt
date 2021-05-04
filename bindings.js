@@ -8,7 +8,7 @@ const events = require('events');
 const debug = require('debug')('noble-winrt');
 const path = require('path');
 
-const BLE_SERVER_EXE = path.resolve(__dirname, 'prebuilt', 'BLEServer.exe');
+const BLE_SERVER_EXE = path.resolve(__dirname, 'prebuilt', 'BLEServer.exe').replace('app.asar', 'app.asar.unpacked');
 
 function toWindowsUuid(uuid) {
     return '{' + uuid + '}';
